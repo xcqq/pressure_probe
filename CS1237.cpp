@@ -1,9 +1,8 @@
+#include "wiring_constants.h"
 #include "CS1237.h"
 
 #define READ_ADC_CONFIG 0x56
 #define WRITE_ADC_CONFIG 0x65
-
-#define WAITING_TIME_TO_SLEEP 100
 
 uint32_t pin_sck;
 uint32_t pin_dout;
@@ -16,25 +15,6 @@ static void send_clk_pulses(uint8_t count)
         delayMicroseconds(1);
         digitalWrite(pin_sck, LOW);
         delayMicroseconds(1);
-    }
-    return;
-}
-
-static void sleep(bool sleep)
-{
-    if (sleep)
-    {
-        digitalWrite(pin_sck, HIGH);
-        delayMicroseconds(WAITING_TIME_TO_SLEEP);
-        sleep = true;
-    }
-    else
-    {
-        digitalWrite(pin_sck, LOW);
-
-        while (!digitalRead(pin_dout));
-        while (digitalRead(pin_dout));
-        sleep = false;
     }
     return;
 }
@@ -53,7 +33,10 @@ int32_t CS1237_read(void)
 {
     int32_t data = 0;
 
-    sleep(false);
+    digitalWrite(pin_sck, LOW);
+
+    //wait for data ready
+    while (digitalRead(pin_dout));
 
     for (uint8_t i = 0; i < 24; i++)
     {
@@ -63,6 +46,8 @@ int32_t CS1237_read(void)
         digitalWrite(pin_sck, LOW);
         delayMicroseconds(1);
     }
+    send_clk_pulses(3);
+
     if (data > 0x7FFFFF)
         data -= 0xFFFFFF;
     return data;
@@ -73,8 +58,6 @@ static uint8_t configure(bool write, uint8_t gain, uint8_t speed, uint8_t channe
     uint8_t data;
 
     CS1237_read();
-
-    send_clk_pulses(3);
 
     pinMode(pin_dout, OUTPUT);
     send_clk_pulses(2);
