@@ -41,6 +41,12 @@
 4. 检查是否工作正常：轻敲热床，观察probe指示灯是否亮起
 5. 可以愉快的玩耍啦
 
+## 一些装机图片
+![c3ea11030f5fa4d87adeda13cd47c202_720](https://github.com/xcqq/pressure_probe/assets/18913791/559d804d-cd45-465d-b77e-7d6e3d37d4a9)
+![015c85ffd0bfe8d8782fd6e17e1499c8_720](https://github.com/xcqq/pressure_probe/assets/18913791/52f563c8-a1ab-4008-8f2b-c1b0740528e2)
+![6f43cf3bd518bb57f6b834be3c2766a2](https://github.com/xcqq/pressure_probe/assets/18913791/1013c4d4-837a-40c3-bbe7-a575c57c16b9)
+
+
 ### 修改配置
 代码中留下了一部分预定义的参数供大家修改
 
