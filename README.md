@@ -4,7 +4,7 @@
 <img width="998" alt="image" src="https://github.com/xcqq/pressure_probe/assets/18913791/6f5f62ae-e65e-4be7-ad42-4da2d2c5180a">
 
 ### 原理图以及PCB
-原理图和PCB开源在立创开源平台：https://oshwhub.com/froyo94/pressure_probe（还在审核）
+原理图和PCB开源在立创开源平台（还在审核）：https://oshwhub.com/froyo94/pressure_probe
 
 ### 基本信息
 * 主控：stm32g030f6p6 
