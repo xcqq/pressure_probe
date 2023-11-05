@@ -1,4 +1,3 @@
-#include "wiring_constants.h"
 #include "CS1237.h"
 
 #define READ_ADC_CONFIG 0x56
