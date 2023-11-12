@@ -186,7 +186,18 @@ void loop()
         digitalWrite(LED_PROBE, LOW);
     }
     //debug log
-    Serial.printf("%ld,%ld,%ld,%ld\n", (int32_t)ret,(int32_t) weight, (int32_t)filter_window_data.mid, (int32_t)window_data.mean);
+    Serial.print("Raw:");
+    Serial.print(ret);
+    Serial.print(",");
+    Serial.print("Weight:");
+    Serial.print(filter_window_data.mid);
+    Serial.print(",");
+    Serial.print("Ref:");
+    Serial.print(window_data.mean);
+    Serial.print(",");
+    Serial.print("Th");
+    Serial.print(config.threshold);
+    Serial.println();
     // check if btn pressed
     if (digitalRead(KEY_USER) == LOW) {
         while (digitalRead(KEY_USER) == LOW);
