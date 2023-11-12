@@ -32,7 +32,6 @@
 typedef struct {
     uint64_t magic;
     int32_t threshold;
-    uint32_t sensor_reverse;
 } config_t;
 
 config_t config;
@@ -115,7 +114,6 @@ void config_init(config_t *config)
     if (config->magic != CONFIG_MAGIC) {
         config->magic = CONFIG_MAGIC;
         config->threshold = THRESHOLD_MIN;
-        config->sensor_reverse = SENSOR_REVERSE;
         config_set(config);
         led_blink(LED_DEBUG, 1, 1000);
     }
@@ -164,10 +162,11 @@ int32_t adc_to_weight(int32_t value)
     int64_t con = SENSOR_MAX_VOLT * ADC_MAX_VALUE * ADC_PGA / (ADC_REF_VOLT * SENSOR_MAX_WEIGHT);
     weight = value / con;
 
-    if (config.threshold)
+#ifdef SENSOR_REVERSE
         return -weight;
-    else
+#else
         return weight;
+#endif
 }
 
 void loop()
