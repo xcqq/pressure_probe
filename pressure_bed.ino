@@ -31,20 +31,20 @@
 #define CONFIG_MAGIC 0xDEADDEAD
 typedef struct {
     uint64_t magic;
-    uint32_t threshold;
+    int32_t threshold;
     uint32_t sensor_reverse;
 } config_t;
 
 config_t config;
 
 typedef struct {
-    int64_t *data;
-    int64_t *sort_data;
+    int32_t *data;
+    int32_t *sort_data;
     uint32_t size;
     int64_t sum;
     int64_t mean;
     int64_t mid;
-    int64_t index;
+    uint32_t index;
 } window_data_t;
 
 window_data_t window_data;
@@ -62,16 +62,16 @@ void window_data_init(window_data_t *wd, uint32_t size)
     wd->index = 0;
     wd->mid = 0;
     wd->size = size;
-    wd->data = (int64_t *)calloc(size, sizeof(*wd->data));
-    wd->sort_data = (int64_t *)calloc(size, sizeof(*wd->sort_data));
+    wd->data = (int32_t *)calloc(size, sizeof(*wd->data));
+    wd->sort_data = (int32_t *)calloc(size, sizeof(*wd->sort_data));
 }
 
-void window_data_add(window_data_t *wd, int64_t data)
+void window_data_add(window_data_t *wd, int32_t data)
 {
     wd->sum -= wd->data[wd->index];
     wd->data[wd->index] = data;
     wd->sum += data;
-    wd->mean = wd->sum / (int64_t)wd->size;
+    wd->mean = wd->sum / wd->size;
     wd->index = (wd->index + 1) % wd->size;
 }
 
@@ -158,9 +158,9 @@ void setup()
         Serial.println("ADC configuration failed");
 }
 
-int64_t adc_to_weight(int64_t value)
+int32_t adc_to_weight(int32_t value)
 {
-    int64_t weight;
+    int32_t weight;
     int64_t con = SENSOR_MAX_VOLT * ADC_MAX_VALUE * ADC_PGA / (ADC_REF_VOLT * SENSOR_MAX_WEIGHT);
     weight = value / con;
 
@@ -172,8 +172,8 @@ int64_t adc_to_weight(int64_t value)
 
 void loop()
 {
-    int64_t ret = 0;
-    int64_t weight = 0;
+    int32_t ret = 0;
+    int32_t weight = 0;
 
     ret = CS1237_read();
     weight = adc_to_weight(ret);
