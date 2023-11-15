@@ -178,11 +178,11 @@ void loop()
     weight = adc_to_weight(ret);
     window_data_add(&filter_window_data, weight);
     window_data_mid(&filter_window_data);
-    window_data_add(&window_data, filter_window_data.mid);
     if (weight - window_data.mean >= config.threshold) {
         digitalWrite(LED_PROBE, HIGH);
     } else {
         digitalWrite(LED_PROBE, LOW);
+        window_data_add(&window_data, filter_window_data.mid);
     }
     //debug log
     Serial.print("Raw:");
