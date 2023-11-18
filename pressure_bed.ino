@@ -23,10 +23,11 @@
 #define FILTER_WINDOW_SIZE 20
 
 // edge detection configure
-#define WINDOW_SIZE 500
+#define WINDOW_SIZE 600
 #define THRESHOLD_MIN 100 // g
 #define THRESHOLD_MAX 400
 #define THRESHOLD_STEP 50
+#define BASE_WEIGHT_UPDATE_THRESHOLD 50
 
 #define CONFIG_MAGIC 0xDEADDEAD
 typedef struct {
@@ -43,12 +44,15 @@ typedef struct {
     int64_t sum;
     int64_t mean;
     int64_t mid;
+    int64_t max;
+    int64_t min;
     uint32_t index;
 } window_data_t;
 
 window_data_t window_data;
 window_data_t filter_window_data;
 
+int32_t base_weight = 0;
 
 int compare(const void *a, const void *b) {
     return (*(int64_t*)a - *(int64_t*)b);
@@ -72,6 +76,23 @@ void window_data_add(window_data_t *wd, int32_t data)
     wd->sum += data;
     wd->mean = wd->sum / wd->size;
     wd->index = (wd->index + 1) % wd->size;
+}
+
+void window_data_max_min(window_data_t *wd)
+{
+    int32_t max, min;
+    int i;
+
+    max = wd->data[0];
+    min = wd->data[0];
+    for (i = 1; i < wd->size; i++) {
+        if (wd->data[i] > max)
+            max = wd->data[i];
+        if (wd->data[i] < min)
+            min = wd->data[i];
+    }
+    wd->max = max;
+    wd->min = min;
 }
 
 void window_data_mid(window_data_t *wd)
@@ -142,7 +163,7 @@ void setup()
     pinMode(KEY_USER, INPUT_PULLUP);
     pinMode(LED_DEBUG, OUTPUT);
     pinMode(LED_PROBE, OUTPUT);
-    digitalWrite(LED_DEBUG, LOW);
+    digitalWrite(LED_DEBUG, HIGH);
     digitalWrite(LED_PROBE, LOW);
 
     window_data_init(&window_data, WINDOW_SIZE);
@@ -177,24 +198,33 @@ void loop()
     ret = CS1237_read();
     weight = adc_to_weight(ret);
     window_data_add(&filter_window_data, weight);
-    window_data_mid(&filter_window_data);
-    if (weight - window_data.mean >= config.threshold) {
-        digitalWrite(LED_PROBE, HIGH);
+    window_data_add(&window_data, filter_window_data.mean);
+    window_data_max_min(&window_data);
+
+    if (window_data.max - window_data.min < BASE_WEIGHT_UPDATE_THRESHOLD) {
+        base_weight = window_data.mean;
+        digitalWrite(LED_DEBUG, LOW);
+    }
+    if (base_weight != 0) {
+        if (weight - base_weight >= config.threshold) {
+            digitalWrite(LED_PROBE, HIGH);
+        } else {
+            digitalWrite(LED_PROBE, LOW);
+        }
     } else {
-        digitalWrite(LED_PROBE, LOW);
-        window_data_add(&window_data, filter_window_data.mid);
+        digitalWrite(LED_PROBE, HIGH);
     }
     //debug log
     Serial.print("Raw:");
     Serial.print(ret);
     Serial.print(",");
     Serial.print("Weight:");
-    Serial.print(filter_window_data.mid);
+    Serial.print(filter_window_data.mean);
     Serial.print(",");
     Serial.print("Ref:");
-    Serial.print(window_data.mean);
+    Serial.print(base_weight);
     Serial.print(",");
-    Serial.print("Th");
+    Serial.print("Th:");
     Serial.print(config.threshold);
     Serial.println();
     // check if btn pressed
